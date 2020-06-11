@@ -30,6 +30,9 @@ struct ContentView: View {
     @State private var scoreTitle = ""
     @State private var score = 0
     
+    @State private var animationAmount = [0.0, 0.0, 0.0]
+    @State private var blurRadius = [0.0, 0.0, 0.0]
+    
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [.blue, .black]), startPoint: .top, endPoint: .bottom)
@@ -52,6 +55,8 @@ struct ContentView: View {
                         Image(self.countries[number])
                             .renderingMode(.original)
                             .self.modifier(FlagImage())
+                            .blur(radius: CGFloat(self.blurRadius[number]))
+                            .rotation3DEffect(.degrees(self.animationAmount[number]), axis: (x: 0, y: 1, z: 0))
                     }
                 }
                 
@@ -77,9 +82,29 @@ struct ContentView: View {
         if number == correctAnswer {
             scoreTitle = "Correct"
             score += 1
+            withAnimation {
+                self.animationAmount[number] += 360
+            }
         } else {
             scoreTitle = "Wrong! That's flag of \(countries[number])"
             score = 0
+        }
+        
+        if correctAnswer == 0 {
+            withAnimation {
+                self.blurRadius[1] = 25.0
+                self.blurRadius[2] = 25.0
+            }
+        } else if correctAnswer == 1 {
+            withAnimation {
+                self.blurRadius[0] = 25.0
+                self.blurRadius[2] = 25.0
+            }
+        } else {
+            withAnimation {
+                self.blurRadius[0] = 25.0
+                self.blurRadius[1] = 25.0
+            }
         }
         
         showingScore = true
@@ -87,6 +112,9 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        withAnimation {
+            self.blurRadius = [0.0, 0.0, 0.0]
+        }
     }
 }
 
